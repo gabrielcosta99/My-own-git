@@ -18,6 +18,7 @@ def main():
         with open(".git/HEAD", "w") as f:
             f.write("ref: refs/heads/main\n")
         print("Initialized git directory")
+
     elif command == "cat-file": # cats a file from the "objects" folder inside of ".git"
         if sys.argv[2] == "-p":
             file = sys.argv[3]
@@ -27,26 +28,45 @@ def main():
                 header, content = content.split(b"\0")  # so we have to split by the "\0"            
                 print(content.decode("utf-8"),end="")
                 
-    elif command == "hash-object":  # Compute the SHA hash of the file + write it to .git/objects
+    elif command == "hash-object":  # Compute the SHA-1 hash of the file and write it to .git/objects
         if sys.argv[2] == "-w":
-            file = sys.argv[3]
-            f = open(file,"rb") 
-            content = f.read()
-            header = f"blob {len(content)}\x00"
-            store = header.encode("ascii")+content
-            blob = hashlib.sha1(store)
-            blobHashed = blob.hexdigest()
-            comp = zlib.compress(store)
-            if not os.path.isdir(f".git/objects/{blobHashed[:2]}"):
-                os.mkdir(f".git/objects/{blobHashed[:2]}")
-            if os.path.exists(f".git/objects/{blobHashed[:2]}/{blobHashed[2:]}"):
-                os.remove(f".git/objects/{blobHashed[:2]}/{blobHashed[2:]}")
-            f2 = open(f".git/objects/{blobHashed[:2]}/{blobHashed[2:]}","wb")
-            f2.write(comp)
-            print(blobHashed)
+            file = sys.argv[3]  # Get the file name from the command line arguments
+            f = open(file, "rb")  # Open the file in binary read mode
+            content = f.read()  # Read the entire content of the file
 
-            f.close()
-            f2.close()        
+            # Create the header for the blob object, which includes the type 'blob' and the length of the content
+            header = f"blob {len(content)}\x00"
+            store = header.encode("ascii") + content  # Combine the header and the content
+            
+            # Compute the SHA-1 hash of the header+content
+            sha = hashlib.sha1(store).hexdigest()
+
+            # Compress the header+content using zlib
+            comp = zlib.compress(store)
+
+            # Create the necessary directories in .git/objects based on the hash
+            if not os.path.isdir(f".git/objects/{sha[:2]}"):
+                os.mkdir(f".git/objects/{sha[:2]}")
+            
+            # If a file with the same hash already exists, remove it
+            if os.path.exists(f".git/objects/{sha[:2]}/{sha[2:]}"):
+                os.remove(f".git/objects/{sha[:2]}/{sha[2:]}")
+
+            # Write the compressed data to the appropriate file in .git/objects
+            with open(f".git/objects/{sha[:2]}/{sha[2:]}", "wb") as f2: 
+                f2.write(comp)
+
+            print(sha)  # Print the hash to the console
+
+            f.close()  # Close the original file
+    elif "ls-tree":
+        file = sys.argv[2]
+        with open(f".git/objects/{file[:2]}/{file[2:]}","rb") as f:     # the first two chars are the name of the folder, the rest is the name of the file
+            decomped = zlib.decompress(f.read())         # decompress the content file
+            lst = decomped.split(b"\0")  # so we have to split by the "\0"   
+            lst.pop(0)   #remove the header
+            print(decomped)
+            # print(content.decode("utf-8"),end="")
     else:
         raise RuntimeError(f"Unknown command #{command}")
 
