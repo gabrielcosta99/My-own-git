@@ -88,14 +88,25 @@ def main():
                 mode, name = line.split()
                 while len(data)>0:
                     sha = data[:21] # the first 20 characters are 'sha encoded bytes'
-                    print(f"{mode.decode()} blob {hashlib.sha1(sha).hexdigest()} {name.decode()}")  # FALTA CONFIGURAR SE É BLOB OU TREE
+                    file_type = "blob"
+                    # if str(mode.decode()) == "100644" or str(mode.decode()) == "100755": 
+                    #     file_type = "blob"
+                    if str(mode.decode()) == "40000": 
+                        mode = b"0"+mode
+                        file_type = "tree"
+                    elif str(mode.decode()) == "120000": 
+                        file_type = "link"
+                    print(f"{mode.decode()} {file_type} {hashlib.sha1(sha).hexdigest()} {name.decode()}")  
                     if len(data)> 20:
                         line,data = data[20:].split(b"\0",maxsplit=1)
                         mode, name = line.split()
                     else:
                         break
     
+    
+    elif "write-tree":
 
+        
     
                 
     else:

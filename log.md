@@ -95,5 +95,6 @@ To do this I followed the following steps:
 3. Split the data by the first `b"\0"` that appears (`line` and `data` where the variables I used)
 4. Split the first part by the `space character` (resulting in the `mode` and `name` variables)
 5. Decrypt the first 20 characters using `sha1` 
-6. Print the decoded mode, the type of file (blob, tree, etc), the decrypted 20 byte sha and the name of the file.
-6. Skip the following 20 characters from the data and repeat from **step 3** until there are no more characters
+6. Check what type of file it is (directory, file, symbolic link)
+7. Print the decoded mode, the type of file (blob, tree, etc), the decrypted 20 byte sha and the name of the file.
+8. Skip the following 20 characters from the data and repeat from **step 3** until there are no more characters
