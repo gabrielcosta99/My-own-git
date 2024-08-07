@@ -45,3 +45,55 @@ To implement it i did the following:
 4. Create the directory, in which the file will be stored (if necessary)
 4. Write the data **(the compressed blob)** to the appropriate file in `.git/objects` **(the hashed blob)**
 5. Print the hashed blob to the console
+
+## Fourth Exercise: Read a tree object (ls-tree)
+
+The `git ls-tree` command is used to inspect a tree object.
+For a directory structure like this:
+```
+your_repo/
+  - file1
+  - dir1/
+    - file_in_dir_1
+    - file_in_dir_2
+  - dir2/
+    - file_in_dir_3
+```
+The output of git ls-tree would look like this:
+
+```sh
+$ git ls-tree <tree_sha>
+040000 tree <tree_sha_1>    dir1
+040000 tree <tree_sha_2>    dir2
+100644 blob <blob_sha_1>    file1
+```
+Note that the output is alphabetically sorted, this is how Git stores entries in the tree object internally.
+
+### Tree objects:
+
+The format of a tree object file looks like this (after Zlib decompression):
+```
+tree <size>\0
+<mode> <name>\0<20_byte_sha>
+<mode> <name>\0<20_byte_sha>
+```
+(The above code block is formatted with newlines for readability, but the actual file doesn't contain newlines)
+
+### Implementing 'ls-tree --name-only'
+To do this I followed the following steps:
+1. Zlib decompress the file
+2. Remove the header 
+3. Split the data by the first `b"\0"` that appears (`line` and `data` where the variables I used)
+4. Split the first part by the `space character` and print the second element 
+5. Remove the first 20 characters from `data` since we won't be using the hash
+6. Repeat from **step 3** until no elements remain
+
+### optional: implementing 'ls-tree'
+To do this I followed the following steps:
+1. Zlib decompress the file
+2. Remove the header 
+3. Split the data by the first `b"\0"` that appears (`line` and `data` where the variables I used)
+4. Split the first part by the `space character` (resulting in the `mode` and `name` variables)
+5. Decrypt the first 20 characters using `sha1` 
+6. Print the decoded mode, the type of file (blob, tree, etc), the decrypted 20 byte sha and the name of the file.
+6. Skip the following 20 characters from the data and repeat from **step 3** until there are no more characters

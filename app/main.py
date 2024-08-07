@@ -19,6 +19,7 @@ def main():
             f.write("ref: refs/heads/main\n")
         print("Initialized git directory")
 
+    ######## Second Exercise ############
     elif command == "cat-file": # cats a file from the "objects" folder inside of ".git"
         if sys.argv[2] == "-p":
             file = sys.argv[3]
@@ -27,7 +28,9 @@ def main():
                 # a blob format after zlib decompression is "blob <size>\0<content>" (example: blob 11\0hello world)
                 header, content = content.split(b"\0")  # so we have to split by the "\0"            
                 print(content.decode("utf-8"),end="")
-                
+
+         
+    ######## Third Exercise ############
     elif command == "hash-object":  # Compute the SHA-1 hash of the file and write it to .git/objects
         if sys.argv[2] == "-w":
             file = sys.argv[3]  # Get the file name from the command line arguments
@@ -59,36 +62,41 @@ def main():
             print(sha)  # Print the hash to the console
 
             f.close()  # Close the original file
-    elif "ls-tree": 
-        file = sys.argv[2]
-        with open(f".git/objects/{file[:2]}/{file[2:]}","rb") as f:     # the first two chars are the name of the folder, the rest is the name of the file
-            decomped = zlib.decompress(f.read())         # decompress the content file
-            _, data = decomped.split(b"\0",maxsplit=1)  # remove the header
 
-            while len(data)>0:
-                line,data = data.split(b"\0",maxsplit=1)    #line example: \x1f\x00\x9c\xac\xcd\xae\xc5\x8d\xe9U\x04P\x9a\xae/a\xf7s\xd4\xdf100644 test.txt
-                _,name = line.split()
-                print(name.decode())  
-                data = data[20:]                            #remove the sha characters 
+    ######## Fourth Exercise ############
+    elif "ls-tree --name-only": 
+        if sys.argv[2] == "--name-only":
+            file = sys.argv[3]
+            with open(f".git/objects/{file[:2]}/{file[2:]}","rb") as f:     # the first two chars are the name of the folder, the rest is the name of the file
+                decompressed_data = zlib.decompress(f.read())         # decompress the content file
+                _, data = decompressed_data.split(b"\0",maxsplit=1)  # remove the header
 
+                while len(data)>0:
+                    line,data = data.split(b"\0",maxsplit=1)    #line example: \x1f\x00\x9c\xac\xcd\xae\xc5\x8d\xe9U\x04P\x9a\xae/a\xf7s\xd4\xdf100644 test.txt
+                    _,name = line.split()
+                    print(name.decode())  
+                    data = data[20:]                            #remove the sha characters 
+    
+        else:               # ls-tree
+            file = sys.argv[2]
+            with open(f".git/objects/{file[:2]}/{file[2:]}","rb") as f:     # the first two chars are the name of the folder, the rest is the name of the file
+                decompressed_data = zlib.decompress(f.read())         # decompress the content file
+                _, data = decompressed_data.split(b"\0",maxsplit=1)  # remove the header
 
-    # elif "ls-tree":
-    #     file = sys.argv[2]
-    #     with open(f".git/objects/{file[:2]}/{file[2:]}","rb") as f:     # the first two chars are the name of the folder, the rest is the name of the file
-    #         decomped = zlib.decompress(f.read())         # decompress the content file
-    #         _, data = decomped.split(b"\0",maxsplit=1)  # remove the header
+                # Process the first line of the data
+                line, data = data.split(b"\0", maxsplit=1)
+                mode, name = line.split()
+                while len(data)>0:
+                    sha = data[:21] # the first 20 characters are 'sha encoded bytes'
+                    print(f"{mode.decode()} blob {hashlib.sha1(sha).hexdigest()} {name.decode()}")  # FALTA CONFIGURAR SE É BLOB OU TREE
+                    if len(data)> 20:
+                        line,data = data[20:].split(b"\0",maxsplit=1)
+                        mode, name = line.split()
+                    else:
+                        break
+    
 
-    #         line,data = data.split(b"\0",maxsplit=1)    # the first part will be something like: 100755 compile.sh
-    #         mode,name = line.split()
-    #         while len(data)>0:
-                
-    #             sha = data[:21] # the first 20 characters are 'sha encoded bytes'
-    #             print(f"{mode.decode()} blob {hashlib.sha1(sha).hexdigest()} {name.decode()}")  # FALTA CONFIGURAR SE É BLOB OU TREE
-    #             if len(data)>=21:
-    #                 line,data = data[20:].split(b"\0",maxsplit=1)
-    #             else:
-    #                 break
-    #             mode,name = line.split()
+    
                 
     else:
         raise RuntimeError(f"Unknown command #{command}")
