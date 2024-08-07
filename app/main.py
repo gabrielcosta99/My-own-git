@@ -64,7 +64,7 @@ def main():
             f.close()  # Close the original file
 
     ######## Fourth Exercise ############
-    elif "ls-tree --name-only": 
+    elif command=="ls-tree": 
         if sys.argv[2] == "--name-only":
             file = sys.argv[3]
             with open(f".git/objects/{file[:2]}/{file[2:]}","rb") as f:     # the first two chars are the name of the folder, the rest is the name of the file
@@ -105,8 +105,8 @@ def main():
     
     
     elif "write-tree":
-
-        
+        file = os.getcwd()
+        print(os.listdir(file))
     
                 
     else:
