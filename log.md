@@ -98,3 +98,7 @@ To do this I followed the following steps:
 6. Check what type of file it is (directory, file, symbolic link)
 7. Print the decoded mode, the type of file (blob, tree, etc), the decrypted 20 byte sha and the name of the file.
 8. Skip the following 20 characters from the data and repeat from **step 3** until there are no more characters
+
+
+## Fifth Exercise: Write tree objects (write-tree)
+**In this exercise, i won't be using a staging area, I'll just assume that all files are staged.**
