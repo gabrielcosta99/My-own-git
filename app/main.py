@@ -78,34 +78,11 @@ def main():
                         mode, name = line.split()
                     else:
                         break
-    elif "write-tree":
+    
+    ######## Fifth Exercise ############
+    elif command=="write-tree":
         print(get_tree_files("./"))
-     
-    # elif "write-tree":
-    #     # print(write_tree("./"))
-    #     cwd = os.getcwd()
-    #     #print(os.listdir(file))
-    #     tree_sequence = get_tree_files(sorted(os.listdir(cwd)))
-    #     #print(tree_sequence,size)
-    #     print(tree_sequence)
-    #     header = f"tree {len(tree_sequence)}\0"
-    #     store =  header.encode() + tree_sequence
-    #     sha = hashlib.sha1(store).hexdigest()
-
-    #     comp = zlib.compress(store)
-    #     # Create the necessary directories in .git/objects based on the hash
-    #     if not os.path.isdir(f".git/objects/{sha[:2]}"):
-    #         os.mkdir(f".git/objects/{sha[:2]}")
-        
-    #     # If a file with the same hash already exists, remove it
-    #     if os.path.exists(f".git/objects/{sha[:2]}/{sha[2:]}"):
-    #         os.remove(f".git/objects/{sha[:2]}/{sha[2:]}")
-
-    #     # Write the compressed data to the appropriate file in .git/objects
-    #     with open(f".git/objects/{sha[:2]}/{sha[2:]}", "wb") as f: 
-    #         f.write(comp)
-    #     print(sha)
-
+    #elif command=="commit-tree":
 
     else:
         raise RuntimeError(f"Unknown command #{command}")
@@ -134,8 +111,8 @@ def get_tree_files(file):
             string+=f"{mode} {f}\0".encode()
 
         sha = int.to_bytes(int(get_tree_files(path),base=16),length=20,byteorder="big")
-
         string+=sha
+        
     string = f"tree {len(string)}\0".encode()+string
     sha = hashlib.sha1(string).hexdigest()
 
@@ -155,63 +132,6 @@ def get_tree_files(file):
         f2.write(comp)
     return sha
     
-
-
-
-
-
-
-
-
-
-   
-
-
-# def get_tree_files(files):
-#     if len(files) == 0:
-#         return b""
-#     file = files[0]
-#     #print(files)
-#     string = b""
-#     if file != ".git":
-#         if os.path.isdir(file):
-#             dir_files = os.listdir(file)
-#             dir_files = [f"{file}/{f}" for f in dir_files]
-#             #print("dir_files: ",dir_files)
-#             tree_sequence = get_tree_files(dir_files)
-#             print("tree_sequence: ",tree_sequence)
-#             header = f"tree {len(tree_sequence)}\0"
-#             store = header.encode()+tree_sequence
-#             sha = hashlib.sha1(store).hexdigest()
-
-#             #print("store: ",store)
-#             comp = zlib.compress(store)
-
-#             # Create the necessary directories in .git/objects based on the hash
-#             if not os.path.isdir(f".git/objects/{sha[:2]}"):
-#                 os.mkdir(f".git/objects/{sha[:2]}")
-            
-#             # If a file with the same hash already exists, remove it
-#             if os.path.exists(f".git/objects/{sha[:2]}/{sha[2:]}"):
-#                 os.remove(f".git/objects/{sha[:2]}/{sha[2:]}")
-
-#             # Write the compressed data to the appropriate file in .git/objects
-#             with open(f".git/objects/{sha[:2]}/{sha[2:]}", "wb") as f2: 
-#                 f2.write(comp)
-#             string += f"40000 {file}\0".encode()+sha     
-#         else:
-#             blob_sha = hash_file(file)   
-#             sha = int.to_bytes(int(blob_sha,base=16),length=20,byteorder="big")      
-#             file_stat = os.stat(file)
-#             is_executable = file_stat.st_mode & stat.S_IXUSR != 0
-#             mode = "100755" if is_executable else "100644"
-#             file = file if "/" not in file  else file.split("/")[-1]
-#             #print("file",file)
-#             string += f"{mode} {file}\0".encode()+sha 
-
-            
-#     return string+ get_tree_files(files[1:])
-
 
 def hash_file(file):
     f = open(file, "rb")  # Open the file in binary read mode
@@ -239,60 +159,6 @@ def hash_file(file):
     with open(f".git/objects/{sha[:2]}/{sha[2:]}", "wb") as f2: 
         f2.write(comp)
     return sha
-
-# def create_blob_entry(path, write=True):
-#     with open(path, "rb") as f:
-#         data = f.read()
-#     header = f"blob {len(data)}\0".encode("utf-8")
-#     store = header + data
-#     sha = hashlib.sha1(store).hexdigest()
-#     if write:
-#         # Create the necessary directories in .git/objects based on the hash
-#         if not os.path.isdir(f".git/objects/{sha[:2]}"):
-#             os.mkdir(f".git/objects/{sha[:2]}")
-        
-#         # If a file with the same hash already exists, remove it
-#         if os.path.exists(f".git/objects/{sha[:2]}/{sha[2:]}"):
-#             os.remove(f".git/objects/{sha[:2]}/{sha[2:]}")
-#         with open(f".git/objects/{sha[:2]}/{sha[2:]}", "wb") as f:
-#             f.write(zlib.compress(store))
-#     return sha
-
-# def write_tree(path: str):
-#     if os.path.isfile(path):
-#         return create_blob_entry(path)
-#     contents = sorted(
-#         os.listdir(path),
-#         key=lambda x: x if os.path.isfile(os.path.join(path, x)) else f"{x}/",
-#     )
-#     s = b""
-#     for item in contents:
-#         if item == ".git":
-#             continue
-#         full = os.path.join(path, item)
-#         if os.path.isfile(full):
-#             s += f"100644 {item}\0".encode()
-#         else:
-#             s += f"40000 {item}\0".encode()
-#         sha1 = int.to_bytes(int(write_tree(full), base=16), length=20, byteorder="big")
-#         s += sha1
-#     print("s: ",s)
-
-#     s = f"tree {len(s)}\0".encode() + s
-#     sha1 = hashlib.sha1(s).hexdigest()
-#      # If a file with the same hash already exists, remove it
-#     # Create the necessary directories in .git/objects based on the hash
-#     if not os.path.isdir(f".git/objects/{sha1[:2]}"):
-#         os.mkdir(f".git/objects/{sha1[:2]}")
-    
-#     # If a file with the same hash already exists, remove it
-#     if os.path.exists(f".git/objects/{sha1[:2]}/{sha1[2:]}"):
-#         os.remove(f".git/objects/{sha1[:2]}/{sha1[2:]}")
-   
-#     with open(f".git/objects/{sha1[:2]}/{sha1[2:]}", "wb") as f:
-#         f.write(zlib.compress(s))
-#     return sha1
-
 
 
 if __name__ == "__main__":

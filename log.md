@@ -102,3 +102,37 @@ To do this I followed the following steps:
 
 ## Fifth Exercise: Write tree objects (write-tree)
 **In this exercise, i won't be using a staging area, I'll just assume that all files are staged.**
+The `git write-tree` command creates a tree object from the current state of the "staging area". The staging area is a place where changes go when you run git add.
+
+Here's an example of using git write-tree:
+```sh
+  # Create a file with some content
+  $ echo "hello world" > test.txt
+
+  # Add the file to the staging area (we won't implement a staging area in this challenge)
+  $ git add test.txt
+
+  # Write the tree to .git/objects
+  $ git write-tree
+  4b825dc642cb6eb9a060e54bf8d69288fbee4904
+```
+The output of git write-tree is the 40-char SHA hash of the tree object that was written to `.git/objects`.
+
+To implement this, I needed to:
+1. Iterate over the files/directories in the working directory
+2. If the entry is a file, create a blob object (using the same logic as `hash-object`) and record its SHA hash
+3. If the entry is a directory, recursively create a tree object and record its SHA hash
+4. Once you have all the entries and their SHA hashes, write the tree object to the .git/objects directory
+5. If you're testing this against git locally, make sure to run git add . before git write-tree, so that all files in the working directory are staged.
+
+**Note:** remember that a tree object is something like this:
+```
+  tree <size>\0
+  <mode> <name>\0<20_byte_sha>
+  <mode> <name>\0<20_byte_sha>
+```
+and the mode is:
+- `100755` for executable files
+- `100644` for regular files
+- `040000` for directories
+
