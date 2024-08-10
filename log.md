@@ -136,3 +136,50 @@ and the mode is:
 - `100644` for regular files
 - `040000` for directories
 
+## Sixth Exercise: Create a commit (commit-tree)
+
+A commit has the following format: `commit {size}\0{content}`, where `{content}` is:
+```
+tree {tree_sha}
+{parents}
+author {author_name} <{author_email}> {author_date_seconds} {author_date_timezone}
+committer {committer_name} <{committer_email}> {committer_date_seconds} {committer_date_timezone}
+
+{commit message}
+```
+
+where:
+- `{tree_sha}`: SHA of the tree object this commit points to.
+
+  This represents the top-level Git repo directory.
+
+- `{parents}`: optional list of parent commit objects of form:
+  ```
+    parent {parent1_sha}
+    parent {parent2_sha}
+    ...
+  ```
+  The list can be empty if there are no parents, e.g. for the first commit in a repo.
+
+  Two parents happen in regular merge commits.
+
+  More than two parents are possible with git merge -Xoctopus, but this is not a common workflow. Here is an example: https://github.com/cirosantilli/test-octopus-100k
+
+- `{author_name}`: e.g.: `Ciro Santilli`. Cannot contain `<`, `\n`
+
+- `{author_email}`: e.g.: `cirosantilli@mail.com`. Cannot contain `>`, `\n`
+
+- `{author_date_seconds}`: seconds since 1970, e.g. `946684800` is the first second of year 2000
+
+- `{author_date_timezone}`: e.g.: ` +0000` is UTC
+
+- committer fields: analogous to author fields
+
+- `{commit message}`: arbitrary .
+
+
+## Seventh Exercise: Clone a repository
+
+I used [this](https://stefan.saasen.me/articles/git-clone-in-haskell-from-the-bottom-up/#reimplementing-git-clone-in-haskell-from-the-bottom-up) website to understand better how does the `git clone` works: text
+
+
